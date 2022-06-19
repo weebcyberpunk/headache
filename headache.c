@@ -58,16 +58,13 @@ int init(char *filename) {
 		exit(ENOENT);
 	}
 
-	// allocate to program
-	fseek(fp, 0, SEEK_END);
-	text = malloc(ftell(fp));
-	ip = text;
-	fseek(fp, 0, SEEK_SET);
 
-	// push program into text
+	// get program size, ignoring non-instructions, then push program into text
 	char c;
 	unsigned long text_size = 0;
-	while ((c = getc(fp)) != EOF) {
+	short push = 0;
+	for (;;) {
+		c = getc(fp);
 		if (
 			(c == '>') ||
 			(c == '<') ||
@@ -79,8 +76,21 @@ int init(char *filename) {
 			(c == ']')
 
 		) {
+		if (push)
 			text[text_size] = c;
-			text_size++;
+		text_size++;
+		}
+		
+		if (c == EOF) {
+			if (push)
+				break;
+			else {
+				text = malloc(text_size);
+				fseek(fp, 0, SEEK_SET);
+				push = 1;
+				text_size = 0;
+				continue;
+			}
 		}
 	}
 	text[text_size] = EOF;
