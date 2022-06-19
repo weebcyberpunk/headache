@@ -40,7 +40,7 @@ uint8_t *dp;
 
 /*
  * author GG weebcyberpunk@gmail.com
- * version 0.0.0
+ * version 1.1.0
  * since Jun 19, 2022
  */
 
