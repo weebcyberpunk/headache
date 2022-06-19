@@ -4,8 +4,8 @@ headache : headache.c
 .PHONY : test debug
 
 test : headache
-	./headache sum.bf
+	./headache examples/hello-world.bf
 
 debug : headache.c
 	cc -D DEBUG headache.c -o headache-debug
-	./headache-debug sum.bf 
+	./headache-debug examples/hello-world.bf 
