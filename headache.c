@@ -51,137 +51,137 @@ uint8_t *dp;
  */
 int init(char *filename) {
 
-	// open program file
-	FILE *fp = fopen(filename, "r");
-	if (fp == NULL) {
-		fprintf(stderr, "Cannot open file %s\n", filename);
-		exit(ENOENT);
-	}
+    // open program file
+    FILE *fp = fopen(filename, "r");
+    if (fp == NULL) {
+        fprintf(stderr, "Cannot open file %s\n", filename);
+        exit(ENOENT);
+    }
 
 
-	// get program size, ignoring non-instructions, then push program into text
-	char c;
-	unsigned long text_size = 0;
-	short push = 0;
-	for (;;) {
-		c = getc(fp);
-		if (
-			(c == '>') ||
-			(c == '<') ||
-			(c == '+') ||
-			(c == '-') ||
-			(c == '.') ||
-			(c == ',') ||
-			(c == '[') ||
-			(c == ']')
+    // get program size, ignoring non-instructions, then push program into text
+    char c;
+    unsigned long text_size = 0;
+    short push = 0;
+    for (;;) {
+        c = getc(fp);
+        if (
+            (c == '>') ||
+            (c == '<') ||
+            (c == '+') ||
+            (c == '-') ||
+            (c == '.') ||
+            (c == ',') ||
+            (c == '[') ||
+            (c == ']')
 
-		) {
-		if (push)
-			text[text_size] = c;
-		text_size++;
-		}
-		
-		if (c == EOF) {
-			if (push)
-				break;
-			else {
-				text = malloc(text_size);
-				fseek(fp, 0, SEEK_SET);
-				push = 1;
-				text_size = 0;
-				continue;
-			}
-		}
-	}
-	text[text_size] = EOF;
+        ) {
+        if (push)
+            text[text_size] = c;
+        text_size++;
+        }
+        
+        if (c == EOF) {
+            if (push)
+                break;
+            else {
+                text = malloc(text_size);
+                fseek(fp, 0, SEEK_SET);
+                push = 1;
+                text_size = 0;
+                continue;
+            }
+        }
+    }
+    text[text_size] = EOF;
 
-	// initialize pointers
-	ip = text;
-	dp = data;
+    // initialize pointers
+    ip = text;
+    dp = data;
 
-	return(text_size);
+    return(text_size);
 }
 
 int loop(char this) {
 
-	unsigned long pad = 0;
-	uint8_t forward = 0;
-	char other;
+    unsigned long pad = 0;
+    uint8_t forward = 0;
+    char other;
 
-	if (this == '[') {
-		other = ']';
-		forward = 1;
-		ip++;
-	} else {
-		other = '[';
-		ip--;
-	}
+    if (this == '[') {
+        other = ']';
+        forward = 1;
+        ip++;
+    } else {
+        other = '[';
+        ip--;
+    }
 
-	for (;;) {
-		if ((*ip == other) && (!pad))
-			return(errno);
-		if ((*ip == other) && (pad))
-			pad--;
+    for (;;) {
+        if ((*ip == other) && (!pad))
+            return(errno);
+        if ((*ip == other) && (pad))
+            pad--;
 
-		if (*ip == this)
-			pad++;
+        if (*ip == this)
+            pad++;
 
-		if (forward) ip++;
-		else ip--;
-	}
+        if (forward) ip++;
+        else ip--;
+    }
 }
 
 int run() {
 
-	while (*ip != EOF) {
-		if (*ip == '>')
-			dp++;
-		else if (*ip == '<')
-			dp--;
-		else if (*ip == '+')
-			++*dp;
-		else if (*ip == '-')
-			--*dp;
-		else if (*ip == '.')
-			putchar(*dp);
-		else if (*ip == ',')
-			*dp = getchar();
-		else if (*ip == '[') {
-			if (*dp == 0)
-				loop(*ip);
-		} else if (*ip == ']') {
-			if (*dp != 0)
-				loop(*ip);
-		}
+    while (*ip != EOF) {
+        if (*ip == '>')
+            dp++;
+        else if (*ip == '<')
+            dp--;
+        else if (*ip == '+')
+            ++*dp;
+        else if (*ip == '-')
+            --*dp;
+        else if (*ip == '.')
+            putchar(*dp);
+        else if (*ip == ',')
+            *dp = getchar();
+        else if (*ip == '[') {
+            if (*dp == 0)
+                loop(*ip);
+        } else if (*ip == ']') {
+            if (*dp != 0)
+                loop(*ip);
+        }
 
-		ip++;
-	}
+        ip++;
+    }
 
-	return(errno);
+    return(errno);
 }
 
 int main(int argv, char *argc[]) {
-	if (argv < 2) {
-		fprintf(stderr, "Please specify Brainfuck script to run!\n");
-		return(EBADF);
-	}
+    if (argv < 2) {
+        fprintf(stderr, "Please specify Brainfuck script to run!\n");
+        return(EBADF);
+    }
 
-	int p_size = init(argc[1]);
-	run();
+    int p_size = init(argc[1]);
+    run();
 
 #ifdef DEBUG
-	printf("IP: %p\n", ip);
-	printf("Text: %p\n", text);
-	printf("Text size: %i\n", p_size);
-	printf("DP: %p\n", dp);
-	printf("Data: %p\n", data);
+    printf("IP: %p\n", ip);
+    printf("Text: %p\n", text);
+    printf("Text size: %i\n", p_size);
+    printf("DP: %p\n", dp);
+    printf("Data: %p\n", data);
 
-	for (int c = 0; c < MEM_SIZE; c++)
-		printf("%i ", data[c]);
+    for (int c = 0; c < MEM_SIZE; c++)
+        printf("%i ", data[c]);
 
-	for (int c = 0; c < p_size; c++)
-		printf("%c ", text[c]);
+    for (int c = 0; c < p_size; c++)
+        printf("%c ", text[c]);
 #endif
 
-	return(errno);
+    return(errno);
 }
